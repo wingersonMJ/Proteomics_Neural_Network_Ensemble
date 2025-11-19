@@ -1,0 +1,32 @@
+repos:
+  # basic pre-commit stuff
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: check-case-conflict
+      - id: end-of-file-fixer
+      - id: detect-private-key
+      - id: double-quote-string-fixer
+        args: [--markdown-linebreak-ext=md]
+
+  # PEP8 style adherence
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.5
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+
+  # PEP8 style adherence
+  - repo: https://github.com/psf/black
+    rev: 24.8.0   # or latest stable
+    hooks:
+      - id: black
+        language_version: python3
+
+  # sort library imports
+  - repo: https://github.com/PyCQA/isort
+    rev: 7.0.0
+    hooks:
+      - id: isort
