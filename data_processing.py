@@ -3,7 +3,7 @@ import numpy as np
 import pyreadr
 
 # load in proteomics data from sample and validation set
-proteomics = pd.read_csv(".\\Data\\Proteomics_Resid.txt", sep='\t')
+proteomics = pd.read_csv("..\\Data\\Proteomics_Resid.txt", sep='\t')
 val_proteomics = pyreadr.read_r(
     ".\\Data\\Proteomics_Resid_Validation.RDS")
 val_proteomics = val_proteomics[None]

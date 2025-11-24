@@ -6,7 +6,7 @@ from sklearn.impute import KNNImputer
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 
-df = pd.read_csv(".\\Data\\final_df.csv")
+df = pd.read_csv("..\\Data\\final_df.csv")
 
 # drop extra columns
 df.drop(columns=['index', 'SampleName', 'Unnamed: 0'], inplace=True)
