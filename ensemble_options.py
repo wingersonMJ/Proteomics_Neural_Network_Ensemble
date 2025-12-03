@@ -123,10 +123,8 @@ print(
 ######
 # define ensemble methods
 def ensemble_mean(models, X, y): 
-
     predictions = []
-
-    # mean
+    # predictions
     for model in models:
         model.eval()
         with torch.no_grad():
@@ -153,7 +151,7 @@ mean_of_models, loss_1 = ensemble_mean(models, X, y)
 # weighted mean
 def ensemble_wt_mean(models, X, y, weights):
     predictions = []
-    # mean
+    # predictions
     for model in models:
         model.eval()
         with torch.no_grad():
@@ -180,21 +178,50 @@ wtmean_of_models, loss_2 = ensemble_wt_mean(models, X, y, weights=weights)
 def ensemble_regressor(models, X, y, epochs):
     predictions = []
 
-    # mean
+    # predictions
     for model in models:
         model.eval()
         with torch.no_grad():
             out = model(X)
+            out = out.squeeze(-1)
         predictions.append(out)
 
     preds_stack = torch.stack(predictions, dim=1)
+    y = y.unsqueeze(1)
+
+    # normalize predictions
+    preds_norm = (preds_stack - (preds_stack.mean()))/(preds_stack.std())
+
+    # regressor
+    regressor = nn.Linear(10, 1).to(device)
+    optimizer = optim.Adam(regressor.parameters(), lr=0.01)
+    losses = []
+
+    for e in range(epochs):
+        regressor.train()
+        optimizer.zero_grad()
+        out = regressor(preds_norm)
+        loss = criterion(out, y)
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(regressor.parameters(), 
+                                       max_norm=1.0)
+        optimizer.step()
+        losses.append(loss.item())
     
+    plt.figure()
+    plt.plot(losses)
+    plt.show()
 
+    regressor.eval()
+    with torch.no_grad():
+        final_preds = regressor(preds_norm)
+    
+    return final_preds, losses
 
+regressor_preds, loss_3 = ensemble_regressor(
+                                models, X, y, epochs=8000)
 
-
-
-
+print(loss_3[-1])
 
 print(
     f"Baseline: {baseline[0]:.0f}\n"
@@ -202,5 +229,5 @@ print(
     f"Worst: {baseline[1]:.0f}\n\n"
     f"Mean ensemble: {loss_1:.1f}\n"
     f"Wt Mean ensemble: {loss_2:.1f}\n"
-    f"Regression ensemble: {loss_3:.0f}"
+    f"Regression ensemble: {loss_3[-1]:.0f}"
 )
