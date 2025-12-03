@@ -88,29 +88,37 @@ for i, row in best_params.iterrows():
     plt.plot(epoch_loss, label="MSE Loss")
     plt.title(f"Loss for model_{i}")
     plt.legend()
-    plt.savefig(f"./training_figs/final_model_loss_{i}.jpg", dpi=300)
+    plt.savefig(
+        f"./training_figs/final_model_loss_{i}.jpg", dpi=300)
     plt.close()
-
-    with torch.no_grad():
-        pred_y = model(X)
-        pred_y = pred_y
-    plt.figure()
-    plt.scatter(x=pred_y, y=y)
-    plt.xlabel("Predicted value")
-    plt.ylabel("Actual value")
-    plt.show()
 
     # save
     model_loss.append(epoch_loss[-1])
     models.append(model)
 
-# print
+# print loss
 print(model_loss)
+
+model_idx = [436, 620, 112, 296, 180, 
+             472, 504, 149, 181, 184]
+model_idx = np.sort(model_idx)
+model_idx = [str(num) for num in model_idx]
 
 # make a bar plot
 plt.figure()
-plt.bar(model_loss)
+plt.bar(x=model_idx, height=model_loss)
 plt.show()
+
+# get baseline perf
+baseline = []
+baseline.append(np.mean(model_loss))
+baseline.append(np.max(model_loss))
+baseline.append(np.min(model_loss))
+print(
+    f"Baseline: {baseline[0]:.0f}\n"
+    f"Best: {baseline[2]:.0f} | "
+    f"Worst: {baseline[1]:.0f}\n"
+)
 
 ######
 # define ensemble methods
@@ -129,17 +137,22 @@ def ensemble_mean(models, X, y):
     preds_stack = torch.stack(predictions, dim=0)
     mean_preds = preds_stack.mean(dim=0)
 
+    print(f"predictions len: {len(predictions)}")
+    print(f"preds_stack len: {len(preds_stack)}")
+    print(f"mean_preds len: {len(mean_preds)}")
+    print(f"preds_stack shape: {preds_stack.shape}")
+    print(f"mean_preds shape: {mean_preds.shape}")
+
     # get loss
     loss = criterion(mean_preds, y)
 
     return mean_preds, loss.item()
 
+mean_of_models, loss_1 = ensemble_mean(models, X, y)
 
 # weighted mean
 def ensemble_wt_mean(models, X, y, weights):
-
     predictions = []
-
     # mean
     for model in models:
         model.eval()
@@ -148,20 +161,23 @@ def ensemble_wt_mean(models, X, y, weights):
         predictions.append(out)
     
     # final mean
-    preds_stack = torch.stack(predictions, dim=0)
-    w = torch.tensor(weights, dtype=preds_stack.dtype, device=preds_stack.device)
-    w = w.max() - w
+    preds_stack = torch.stack(predictions, dim=1)
+    w = torch.tensor(weights).to(device)
+    w = (w.max() + 1) - w
     w = w / w.sum()
-    mean_preds = (w * preds_stack).sum(dim=0)
+    w = w.view(1, -1, 1) # reshape - took forever to figure this out
+    mean_preds = (preds_stack * w).sum(dim=1)
 
-    # get loss
+    # loss
     loss = criterion(mean_preds, y)
 
     return mean_preds, loss.item()
 
+weights = best_params["Mean_fold_Vloss"].to_numpy()
+wtmean_of_models, loss_2 = ensemble_wt_mean(models, X, y, weights=weights)
 
+# regressor
 def ensemble_regressor(models, X, y, epochs):
-
     predictions = []
 
     # mean
@@ -171,20 +187,20 @@ def ensemble_regressor(models, X, y, epochs):
             out = model(X)
         predictions.append(out)
 
-    preds_stack = torch.stack(predictions, dim=0)
-
-    # init
-    w = 
-    b = 
-
-    # regress
-    for e in range(epochs):
-        pred = w@preds_stack + b
-        loss = criterion(pred, y)
-        w += 
+    preds_stack = torch.stack(predictions, dim=1)
+    
 
 
-mean_of_models, loss_1 = ensemble_mean(models, X, y)
-print(loss_1)
 
-wtmean_of_models, loss_2 = ensemble_wt_mean(models, X, y, weights=best_params["Mean_fold_Vloss"])
+
+
+
+
+print(
+    f"Baseline: {baseline[0]:.0f}\n"
+    f"Best: {baseline[2]:.0f} | "
+    f"Worst: {baseline[1]:.0f}\n\n"
+    f"Mean ensemble: {loss_1:.1f}\n"
+    f"Wt Mean ensemble: {loss_2:.1f}\n"
+    f"Regression ensemble: {loss_3:.0f}"
+)
