@@ -118,7 +118,27 @@ across CV folds.
 
 ### Initial model building
 
-forcing nn to work, because I'm learning lol
+I am forcing a neural network (multi-layer perceptron) for this task. In the 
+'next steps' section below, I discuss finding a model that fits the data 
+rather than forcing the data to fit a model. But, for this example, I am learning 
+more about PyTorch, so NN is what I will use regardless of fit.  
+
+The ProteomicModel.py file contains some initial model building. I am evaluating 
+model depth and width, activation functions, dropout, gradient clipping, lr's, 
+optimizers, etc.  
+
+What I found is that the small sample size still works well with a shallow network. 
+When I include just 4 layers that work down from 7568 > 2500 > 1000 > 100 > 1, then 
+the model tends to train just fine. This is the set-up I will use when searching 
+for appropriate hyperparameters.  
+
+When training and evaluating MSE on the entire dataset, this initial model-building step had a loss of 295.6!    
+
+**Figure 5.** MSE loss over epochs for this initial neural network.  
+<img src="./figs/loss_initial_model.jpg" width=250>
+<img src="./figs/initial_NN.jpg" width=187.5>
+<img src="./figs/initial_NN_kde.jpg" width=187.5>
+<br>
 
 ### Hyperparameter search
 show some figs from search
@@ -140,6 +160,7 @@ NN did not have enough training data to be effective
 Future tasks:
 - Explore other modeling options
     - beyond NN
+    - Find model to fit data, instead of fitting data to model
 - Better data engineering 
     - reduce features
     - combine features

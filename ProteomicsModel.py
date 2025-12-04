@@ -8,8 +8,11 @@ import torch.optim as optim
 import numpy as np
 import random
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 from data_processing_pt2 import final_x, final_y
+
+plt.style.use("seaborn-v0_8-poster")
 
 # set seeds
 seed = 42
@@ -73,7 +76,7 @@ class ProteomicsModel(nn.Module):
 criterion = nn.MSELoss()
 learning_rate = 0.001
 momentum = 0.9
-epoch = 10000
+epoch = 200
 
 device = torch.accelerator.current_accelerator().type
 model = ProteomicsModel().to(device) # MUST DO THIS B4 INIT OPTIMIZR
@@ -117,33 +120,46 @@ for e in range(epoch):
         print(f"Epoch Loss: {avg_loss}\n")
     epoch_loss.append(avg_loss)
     
-plt.figure()
-plt.plot(epoch_loss)
+plt.figure(figsize=(8,6))
+plt.plot(epoch_loss, label="Epoch Loss")
+plt.xlabel("Epochs")
+plt.ylabel("MSE Loss")
+plt.title("Loss over Epochs - Initial Network Model")
+plt.tight_layout()
+plt.savefig("./figs/loss_initial_model.jpg", dpi=300)
 plt.show()
+
+print(epoch_loss[-1])
 
 # check predictions
 with torch.no_grad():
-    pred_y = model(X.to(device)).detach().cpu().numpy()
+    pred_y = model(X.to(device))
+    pred_y = pred_y.squeeze(1)
+    pred_y = pred_y.detach().cpu().numpy()
 
 true_y = y.detach().cpu().numpy()
 
-plt.figure()
-plt.scatter(x=pred_y, y=y)
-plt.xlabel("Predicted Value")
-plt.ylabel("Actual Value")
-plt.plot([20, 90], [20, 90])
+# plot predictions vs actuals
+sns.jointplot(x=pred_y, y=true_y)
+plt.plot([30, 80], [30, 80], 
+         linestyle="--", 
+         color="dimgrey",
+         label="Perfect prediction line")
+plt.xlabel("Predicted values")
+plt.ylabel("Actual values")
+plt.title("Predicted Values - Initial NN Model")
+plt.tight_layout()
+plt.savefig("./figs/initial_NN.jpg", dpi=300)
 plt.show()
 
-plt.figure()
-plt.hist(x=pred_y, bins=15)
-plt.show()
-
-resid = (pred_y[:,0] - true_y)
-print(resid)
-
-plt.figure()
-plt.scatter(x=true_y, y=resid)
-plt.xlabel("Actual Value")
-plt.ylabel("Predicted - Actual")
-plt.plot([20, 90], [0, 0])
+sns.jointplot(x=pred_y, y=true_y, kind='kde', fill=True)
+plt.plot([30, 80], [30, 80], 
+         linestyle="--", 
+         color="dimgrey",
+         label="Perfect prediction line")
+plt.xlabel("Predicted values")
+plt.ylabel("Actual values")
+plt.title("Predicted Values - Initial NN Model")
+plt.tight_layout()
+plt.savefig("./figs/initial_NN_kde.jpg", dpi=300)
 plt.show()
