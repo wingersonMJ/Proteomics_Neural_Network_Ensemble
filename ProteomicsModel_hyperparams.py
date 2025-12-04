@@ -15,6 +15,8 @@ import matplotlib.pyplot as plt
 
 from data_processing_pt2 import final_x, final_y
 
+plt.style.use("seaborn-v0_8-poster")
+
 # set seeds
 seed = 42
 random.seed(seed)
@@ -59,6 +61,10 @@ kf = KFold(n_splits=6, shuffle=True, random_state=seed)
 device = torch.accelerator.current_accelerator().type
 
 # define hyperparams
+# below is the full hyperparam combo I ran. 
+# I am commenting this out in case I accidently run this
+# whole file again. It took ~28 hours to run. Not v efficient.
+"""
 hyperparam_combos = {
     "batch_size": [6, 20, 60],
     "lr": [1e-2, 1e-3, 1e-4],
@@ -66,6 +72,20 @@ hyperparam_combos = {
     "optimizer": ['sgd', 'ADAM', 'RMSprop'], # lr*0.1 for adam, rmsp
     "max_norm": [0.5, 1.0, 5.0],
     "dropout_p": [0.1, 0.3, 0.5, 0.7]
+}
+"""
+# here is a limitted set of hyperparams
+# I am re-doing the search on just these params
+# I already know these are the params I want bc 
+# I ran the search previously and came up with these combos
+# Re-running now just so I can clean up the figures...
+hyperparam_combos = {
+    "batch_size": [6, 20],
+    "lr": [0.001, 0.0001],
+    "momentum": [0.1, 0.3],
+    "optimizer": ['sgd'],
+    "max_norm": [0.5, 1, 5],
+    "dropout_p": [0.1, 0.3]
 }
 # build hyperparam combos
 keys = list(hyperparam_combos.keys())
@@ -86,17 +106,17 @@ search_results = {
     "optimizer": '',
     "max_norm": '',
     "epochs_ran": '',
-    "dropout_p": ''
+    "dropout_p": '',
+    "lr": ''
 }
 
 ########
 # loop!
-"""
 search_results_list = []
 start = time.time()
 ########
 for c, combo in enumerate(hyperparam_grid):
-    print(f"\n------Running Combo: {c}-------")
+    print(f"\nRunning Combo: {c}")
 
     fold_train_loss = []
     fold_val_loss = []
@@ -232,7 +252,9 @@ for c, combo in enumerate(hyperparam_grid):
         plt.plot(fold_train_losses, label="train loss")
         plt.plot(fold_val_losses, label="val loss")
         plt.title(f"{combo}", fontsize=10)
-        plt.savefig(f"./training_figs/loss_combo{c}.png")
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(f"./grid_search_figs/loss_combo{c}.png")
         plt.close()
 
     # mean and sd training loss across folds 
@@ -254,6 +276,7 @@ for c, combo in enumerate(hyperparam_grid):
     search_results['max_norm'] = combo['max_norm']
     search_results['dropout_p'] = combo['dropout_p']
     search_results['epochs_ran'] = float(np.mean(fold_epochs_ran))
+    search_results['lr'] = combo['lr']
 
     # append
     search_results_list.append(search_results.copy())
@@ -264,13 +287,4 @@ print(f"Min. to run: {(end - start) / 60}\n")
 
 # explore best hyperparams
 df = pd.DataFrame(search_results_list)
-df.to_csv("../Data/hyper_param_results.csv")
-print(df)
-
-# next project #
-
-# summary writier / tensorboard
-# hyperparam searching tool
-# actual iteration over train/val/test sets
-# separate out things into different python files
-"""
+df.to_csv("../Data/hyper_param_results_re-run.csv")

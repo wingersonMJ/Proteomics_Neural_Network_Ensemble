@@ -132,7 +132,9 @@ When I include just 4 layers that work down from 7568 > 2500 > 1000 > 100 > 1, t
 the model tends to train just fine. This is the set-up I will use when searching 
 for appropriate hyperparameters.  
 
-When training and evaluating MSE on the entire dataset, this initial model-building step had a loss of 295.6!    
+When training and evaluating MSE on the entire dataset, this initial model-building step
+ had a loss of 295.6! Performance might not be incredible, but at least it is not 
+ immediately overfitting to the data...  
 
 **Figure 5.** MSE loss over epochs for this initial neural network.  
 <img src="./figs/loss_initial_model.jpg" width=250>

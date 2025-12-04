@@ -72,6 +72,8 @@ best_models_idx = [436, 620, 112, 296, 180,
                    472, 504, 149, 181, 184]
 best_params = df[df['Unnamed: 0'].isin(best_models_idx)]
 print(best_params)
+best_params.to_csv("../Data/best_params.csv")
+
 # plot best param combos
 plt.figure(figsize=(9,6))
 plt.scatter(x=best_params["Mean_fold_Tloss"], 
