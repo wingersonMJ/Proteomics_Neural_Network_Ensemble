@@ -197,6 +197,7 @@ def ensemble_regressor(models, X, y, epochs):
     optimizer = optim.Adam(regressor.parameters(), lr=0.01)
     losses = []
 
+    # add cv part here and tab over section below
     for e in range(epochs):
         regressor.train()
         optimizer.zero_grad()
@@ -208,10 +209,12 @@ def ensemble_regressor(models, X, y, epochs):
         optimizer.step()
         losses.append(loss.item())
     
+    # adjust to instead show loss in train and val sets...
     plt.figure()
     plt.plot(losses)
     plt.show()
 
+    # re-train final regressor on whole dataset
     regressor.eval()
     with torch.no_grad():
         final_preds = regressor(preds_norm)
@@ -231,3 +234,5 @@ print(
     f"Wt Mean ensemble: {loss_2:.1f}\n"
     f"Regression ensemble: {loss_3[-1]:.0f}"
 )
+
+# plot scatter or predicted vals and actuals

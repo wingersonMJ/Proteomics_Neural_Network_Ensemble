@@ -147,34 +147,3 @@ plt.xlabel("Actual Value")
 plt.ylabel("Predicted - Actual")
 plt.plot([20, 90], [0, 0])
 plt.show()
-
-# CV for hyperparam tuning
-    # train on each train fold and validate on each validation fold
-
-# for each hyperparam combo
-    # for each cv fold
-        # initialize a fresh model
-        # train for epochs
-            # iterate on batches 
-                # w and b updates and loss calc on batches
-                # track loss per batch
-                # update weights
-            # train until loss stops going down after a certain num epochs
-        # get (no grad) loss for that training and val fold
-    # aggregate train and val loss across folds (mean, std)
-# repeat on next hyperparam combo
-
-# re-train with best hyperparams on whole dataset
-    # test on the whole dataset
-    # show loss over epochs
-    # show predicted vs actual scatter
-    # show residuals over range of actuals
-
-
-
-
-
-# next project
-# summary writier / tensorboard
-# hyperparam searching tool
-# actual iteration over train/val/test sets

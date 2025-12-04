@@ -5,7 +5,7 @@ import pyreadr
 # load in proteomics data from sample and validation set
 proteomics = pd.read_csv("..\\Data\\Proteomics_Resid.txt", sep='\t')
 val_proteomics = pyreadr.read_r(
-    ".\\Data\\Proteomics_Resid_Validation.RDS")
+    "..\\Data\\Proteomics_Resid_Validation.RDS")
 val_proteomics = val_proteomics[None]
 
 # switch columns to rows and vice versa 
@@ -24,8 +24,8 @@ proteomics.columns = (
 )
 
 # load in demographics 
-demograph = pd.read_csv(".\\Data\\Deidentified_Phenotype.csv")
-val_demograph = pd.read_csv(".\\Data\\Validation_Phenotype.csv")
+demograph = pd.read_csv("..\\Data\\Deidentified_Phenotype.csv")
+val_demograph = pd.read_csv("..\\Data\\Validation_Phenotype.csv")
 
 # adjust val_demographics sample names
 val_proteomics['index'] = (
@@ -60,4 +60,4 @@ df = pd.concat(
     axis=0, join='outer', ignore_index=False)
 
 # save
-df.to_csv(".\\Data\\final_df.csv")
+df.to_csv("..\\Data\\final_df.csv")
