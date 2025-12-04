@@ -1,12 +1,20 @@
 # Neural Network Proteomic Prediction Model!
 
 **Summary:** This project provides a jumping-off point for a model that uses protemoics to predict curve severity in patients with scoliosis.
-The objective is to use >7500 protiens to estimate a patient's Max Cobb angle (range 0-45). I trained multiple neural networks to predict the
+The objective is to use >7500 proteins to estimate a patient's Max Cobb angle (range 0-45). I trained multiple neural networks to predict the
 target variable, then used ensemble learning to train a linear regression on network outputs. 
 
 ## Table of Contents:
-
-
+1. [Python files](#python-files)  
+2. [Predictors and Targets](#predictors-and-targets)  
+3. [Modeling approach](#modeling-approach)  
+    - [Data processing](#data-processing)  
+    - [Baseline model](#baseline-model)  
+    - [Initial model building](#initial-model-building)  
+    - [Hyperparameter search](#hyperparameter-search)
+    - [Model selection](#model-selection)
+    - [Ensemble approaches](#ensemble-approaches)\
+4. [Final summary and next steps](#final-summary-and-next-steps)
 
 ## Python files 
 1. data_processing.py 
@@ -36,19 +44,42 @@ target variable, then used ensemble learning to train a linear regression on net
 
 ## Predictors and Targets
 
-#### Predictors: 
-describe predictors
+The dataset is >7500 proteins from patients with scoliosis. The dataset was quantile normalized and covariates of age and ethnicity were regressed out of the predictors ahead of time (i.e., before I began with additional data processing).  
 
-#### Target:
-describe target
-get kde curve
+**Figure 1.** Correlation matrix represented as a heat map for the predictor variables.  
+<img src="./figs/corr_map.jpg" width=500>
+<br>
+
+The target variable is max_curve - the maximum Cobb angle of the spine in this set of patients with 
+scoliosis. It is a continuous/regression problem.  
+
+**Figure 2.** Kernel density plots showing the distribution of the target variable: max curve angle.  
+<img src="./figs/target_distribution.jpg" width=500>
+<br>
 
 ## Modeling approach
 
+The loss function throughout is Mean Squared Error (MSE). 
+
 ### Data processing
-describe data processing
+
+The data I recieved were original pre-separated into a training and validation 
+splits. The training sample was 66 subjects and the validation set was 10 
+subjects. Given the small sample size, I elected to combine the pre-separated 
+datasets and use cross-validation to iterate through train/val splits, 
+rather than maintain one single train/val split in such a small sample of
+patients.  
+
+I droped 4 subjects with a high degree of missing data. This left us with 
+**n=72** subjects to use in training and validation.  
+
+KNN was used to impute missing values for the proteomic features. Of the 7,568 
+features, only 308 had any missing data. The missing data was contained only
+to the set of 10 subjects who were originally included in the validation set. 
+KNN with k=5 was used to impute the missing data.  
 
 ### Baseline model
+
 describe regression
 show regression prediction figure
 
@@ -69,7 +100,7 @@ performance of each ensembler
 show scatter of final regressor on top of predictions
 add cv approach to regressor too!
 
-### Final summary and next steps
+## Final summary and next steps
 Baseline regressor on limitted predictors was best performing model
 NN did not have enough training data to be effective 
 Future tasks:
