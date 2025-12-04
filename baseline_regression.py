@@ -3,17 +3,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
 from sklearn.model_selection import KFold
 
 from data_processing_pt2 import final_x, final_y
 
+plt.style.use("seaborn-v0_8-poster")
+
 X = final_x
 y = final_y
 
-X_lim = X.iloc[:, 0:100]
-
-X_np = np.asarray(X_lim)
+X_np = np.asarray(X)
 y_np = np.asarray(y).ravel()
 
 def mse(y_pred, y):
@@ -51,40 +52,79 @@ def regression_cv(model, X, y):
 
     print(f"Mean Train MSE: {train_loss.mean():.4f}")
     print(f"Mean Val MSE: {val_loss.mean():.4f}")
+    mean_tLoss = train_loss.mean()
+    mean_vLoss = val_loss.mean()
+    std_tLoss = train_loss.std()
+    std_vLoss = val_loss.std()
+    return mean_tLoss, mean_vLoss, std_tLoss, std_vLoss
 
 # model
 linearModel = LinearRegression()
 regression_cv(linearModel, X_np, y_np)
 
 # try some regularization
-alphas = [0.01, 0.5, 1.0, 2.0]
+alphas = [100, 200, 300, 400, 500, 600, 700, 
+          800, 900, 1000, 2000, 3000, 4000, 
+          5000, 6000, 7000, 8000, 9000, 
+          10000, 15000, 20000, 30000]
+tLoss_alphas = []
+vLoss_alphas = []
 for a in alphas:
     ridgeModel = Ridge(alpha=a)
     print(f"\nAlpha: {a}")
-    regression_cv(ridgeModel, X_np, y_np)
+    tLoss, vLoss, std_vLoss, std_tLoss = regression_cv(
+        ridgeModel, X_np, y_np)
+    tLoss_alphas.append(tLoss)
+    vLoss_alphas.append(vLoss)
 
-# re-fit best regularized model
-ridgeModel = Ridge(alpha=2.0)
-final_model = ridgeModel.fit(X_np, y_np)
-y_pred = final_model.predict(X_np)
-
-# plot y values
-plt.figure()
-sns.kdeplot(y_np, fill=True)
-plt.xlabel("Target values")
+plt.figure(figsize=(8,7))
+plt.plot(alphas, tLoss_alphas, 
+         label="training loss"
+)
+plt.plot(alphas, vLoss_alphas,
+         label="validation loss"
+)
+plt.legend()
+plt.xlabel("Alpha in Ridge Normalization")
+plt.ylabel("MSE Loss")
+plt.title("Training and Validation Loss - Baseline Model")
+plt.savefig("./figs/ridge_alphas.jpg", dpi=300)
 plt.show()
 
+# re-fit best regularized model
+ridgeModel = Ridge(alpha=500)
+final_model = ridgeModel.fit(X_np, y_np)
+y_pred = final_model.predict(X_np)
+t, v, t_std, v_std = regression_cv(ridgeModel, X_np, y_np)
+
 # plot predictions vs actuals
-plt.figure(figsize=(6,6))
-plt.scatter(x=y_pred, y=y_np)
+sns.jointplot(x=y_pred, y=y_np)
 plt.plot([30, 80], [30, 80], 
          linestyle="--", 
          color="dimgrey",
          label="Perfect prediction line")
 plt.xlabel("Predicted values")
 plt.ylabel("Actual values")
-plt.title("Baseline Regression with Regularization")
-plt.legend()
+plt.title("Predicted Values - Baseline Model")
 plt.tight_layout()
 plt.savefig("./figs/baseline_regressor.jpg", dpi=300)
 plt.show()
+
+sns.jointplot(x=y_pred, y=y_np, kind='kde', fill=True)
+plt.plot([30, 80], [30, 80], 
+         linestyle="--", 
+         color="dimgrey",
+         label="Perfect prediction line")
+plt.xlabel("Predicted values")
+plt.ylabel("Actual values")
+plt.title("Predicted Values - Baseline Model")
+plt.tight_layout()
+plt.savefig("./figs/baseline_regressor_kde.jpg", dpi=300)
+plt.show()
+
+# final baseline performance
+print(f"Train loss: {t:.1f}\n"
+    f"Val loss: {v:.1f}\n"
+    f"Train SD: {t_std:.2f}\n"
+    f"Val SD: {v_std:.2f}"
+)

@@ -80,10 +80,44 @@ KNN with k=5 was used to impute the missing data.
 
 ### Baseline model
 
-describe regression
-show regression prediction figure
+I would like to have used a true hold-out test sample to evaluate performance. However, 
+with the sample currently at 72 subjects, all I could afford to do is create train 
+and validation splits through k-fold cross-validation. The value for K was set at k=6, 
+and that value is used continuously throughout the project, including when fitting and 
+evaluating the neural networks later on.  
+
+A linear regression with L2 (Ridge) normalization was fit. Even with regularization, the 
+ridge regression overfit to the data significantly. Extremely high alpha values - 
+the strength of the regularization - were needed to get the training and validation loss 
+to approach eachother.  
+
+**Figure 3.** Training and validation loss during 6-fold cross-validation for a Ridge 
+Regression predicting our target variable.  
+<img src="./figs/ridge_alphas.jpg" width=300>
+<br>
+
+The ridge regression model was re-fit on the entire dataset using an alpha 
+of 500, with the understanding that the model may not be performing very well but is 
+really just serving as a baseline jumping-off point.  
+
+**Figure 4.** Actual and predicted values for the baseline ridge regression model. The 
+grey dashed line represents a perfect predictor.  
+<img src="./figs/baseline_regressor.jpg" width=200>
+<img src="./figs//baseline_regressor_kde.jpg" width=200>
+<br>
+
+**Baseline Performance:** In 6-fold cross-validation, the baseline ridge regression model 
+overfit to the training data and failed to generalize to validation sets, as evidenced by
+ a higher mean validation loss across CV folds and a very high standard deviation of loss
+across CV folds.
+|        | Mean Loss | Stdev Loss |
+| ------ | --------- | ---------- | 
+| Train  | 45.9      | 7.71       |
+| Validation | 167.1 | 86.79      |
+<br>
 
 ### Initial model building
+
 forcing nn to work, because I'm learning lol
 
 ### Hyperparameter search
