@@ -132,8 +132,8 @@ When I include just 4 layers that work down from 7568 > 2500 > 1000 > 100 > 1, t
 the model tends to train just fine. This is the set-up I will use when searching 
 for appropriate hyperparameters.  
 
-When training and evaluating MSE on the entire dataset, this initial model-building step
- had a loss of 295.6! Performance might not be incredible, but at least it is not 
+When training and evaluating MSE on the entire dataset, this initial model-building 
+step had a loss of 295.6! Performance might not be incredible, but at least it is not 
  immediately overfitting to the data...  
 
 **Figure 5.** MSE loss over epochs for this initial neural network.  
@@ -170,7 +170,8 @@ regardless of batch size.
 **Early stopping:**  
 I also included an early stopping criteria in the model training. If validation 
 loss did not increase by a minimum ammount (delta) over a number of consecutive 
-training epochs (patience), then the training loop was terminated. The pre-set delta was 5 points, so the model had to improve validation loss by 5 points to reset the 
+training epochs (patience), then the training loop was terminated. The pre-set delta was 5 points, 
+so the model had to improve validation loss by 5 points to reset the 
 patience counter. If the patience counter was not reset after 15 epochs (i.e., 
 after 15 epochs, the model had not improved validation loss by 5 points or more), 
 then the training loop was terminated. The patience value of 15 epochs was also 
@@ -180,7 +181,8 @@ Training and validation loss plots over epochs were maintained for each
 hyperparameter combination. Rather than save a plot for every model in CV (6 models 
 per hyperparam combo), I just saved the model loss plots for the final CV fold.  
 
-**Figure 6.** Training and validation loss plots for two models with different hyperparameter combinations. THe first is a model trained for the full 300 epochs, 
+**Figure 6.** Training and validation loss plots for two models with different 
+hyperparameter combinations. THe first is a model trained for the full 300 epochs, 
 but did not reach convergence. The second model had more aggressive gradient 
 clipping and met early stopping criteria after ~75 epochs of training.  
 <img src="./grid_search_figs/loss_combo0.png" width=300>
@@ -188,11 +190,68 @@ clipping and met early stopping criteria after ~75 epochs of training.
 
 ### Model selection
 
-describe selection process
-show plots for all the models
+I used mean training and validation MSE Loss across CV folds 
+to determine which models were performing the best. The top 
+10 performing models would be included in later ensemble 
+learning tasks. The decision to keep 10 models was arbitrary. 
+A next step in this project might be evaluating different 
+combinations of models to determine which are best in ensemble 
+learning tasks.  
 
-Below are training and loss plots from all 10 models selected for the ensemble approach.  
+**Figure 7.** The mean training and validation losses for each 
+model across the 6-folds in cross-validation. Most models have 
+training and validation losses below 1,000. A few models failed 
+to identify patterns in the data and thus have high loss. In the 
+next plot, I filter out those poor performing models.  
+<img src="./figs/search_results_all.jpg" width=300>
+<br>
 
+**Figure 8.** The same mean training and validation losses for 
+models, but I filtered the list to only include those with a 
+validation loss less than 1,000. We are again seeing a pattern 
+where a majority of models are overfitting to the training data 
+and failing to generalize to the validation sets (cluster 
+of points in the upper left of the plot). But a handful of models 
+are performing well in both training and validation sets 
+(smaller cluster of models in the bottom center of the plot). 
+Those models might be good candidates for ensemble learning.    
+<img src="./figs/search_results_filtered.jpg" width=400>
+<br>
+
+**Figure 9.** If we filter down even further to just models with 
+a training *and* validation loss of below 300, then we can see 
+a handful of models that are performing well in both sets of 
+data.  
+<img src="./figs/search_results_possible.jpg" width=400>
+<br>
+
+I selected the best 10 models to use in my ensemble learning. In 
+the future, I might explore different model types to include in 
+the ensemble, but for this initial start I just chose the best 
+10 models.  
+
+To identify the best 10 models, I evaluated the mean training 
+and validation losses across CV folds. I also considered the 
+standard deviation of the training and validation losses across 
+folds. An ideal model would have low but comparable losses in 
+training and validation (i.e., not grossly overfitting to the 
+training data), and would have a low standard deviation for 
+the loss in the validation set (i.e., relatively stable 
+performance across data validation splits).  
+
+**Figure 10.** Training and loss performance for each model 
+being considered for ensemble learning. The mean training and 
+validation losses are plotted on the X and Y axes, respectively. 
+The size of the dot represents the SD for training loss, and the 
+color of the dot represents the SD for validation loss. I am 
+looking for dots that are smaller (lower training SD), darker 
+(lower validation SD), and closer to the bottom left corner of 
+the plot.  
+<img src="./figs/search_results_mean_and_sd.jpg" width=600>
+<br>
+
+Based on these criteria, I selected 10 models to use in ensemble 
+learning. Below are training and loss plots for all 10 models selected:    
 <img src="./grid_search_figs/loss_combo2.png" width=100>
 <img src="./grid_search_figs/loss_combo8.png" width=100>
 <img src="./grid_search_figs/loss_combo_momentumfix0.png" width=100>
@@ -203,6 +262,7 @@ Below are training and loss plots from all 10 models selected for the ensemble a
 <img src="./grid_search_figs/loss_combo32.png" width=100>
 <img src="./grid_search_figs/loss_combo_momentumfix6.png" width=100>
 <img src="./grid_search_figs/loss_combo_momentumfix11.png" width=100>
+<br>
 
 ### Ensemble approaches
 describe ensemble approaches
