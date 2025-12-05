@@ -143,11 +143,66 @@ When training and evaluating MSE on the entire dataset, this initial model-build
 <br>
 
 ### Hyperparameter search
-show some figs from search
+
+I use grid searching to find hyperparameters. In the future, I would probably 
+partition the search by first identifying a good optimizer and learning rate, then 
+adding additional components of dropout, momentum, etc. later on. But for this 
+project I searched an entire grid of values for: batch size, learning rate, momentum 
+optmizer, max_norm in gradient clipping, and dropout.  
+
+**Cross-Validation:**  
+I used 6-fold cross-validation, thus training and evaluating 6 models for each 
+combination of hyperparameter values. I then averaged the training and validation 
+loss across all folds of the data.  
+
+**Flexible Epochs:**  
+The model was set to train for 300 epochs. However, because I explored different 
+batch sizes - batch sizes of 6, 20, and 60 (full batch) were attempted - the 
+actual number of weight updates would differ between models with non-matching 
+batch sizes, even if both were trained for the same number of epochs. To allow 
+models with larger batch sizes the chance to exahustively train, I used a 
+flexible epoch training value. If batch size for a combo was 60, then the 
+maximum number of epoch ran was increased by 10. If the batch size was 20, epochs 
+were increased by ~3.33. A batch size of 6 had no increase in epochs. This aligns 
+the epochs for different batch sizes, allowing for the same number of weight updates 
+regardless of batch size.  
+
+**Early stopping:**  
+I also included an early stopping criteria in the model training. If validation 
+loss did not increase by a minimum ammount (delta) over a number of consecutive 
+training epochs (patience), then the training loop was terminated. The pre-set delta was 5 points, so the model had to improve validation loss by 5 points to reset the 
+patience counter. If the patience counter was not reset after 15 epochs (i.e., 
+after 15 epochs, the model had not improved validation loss by 5 points or more), 
+then the training loop was terminated. The patience value of 15 epochs was also 
+adjusted based on batch size, using the same process as outlined above.  
+
+Training and validation loss plots over epochs were maintained for each 
+hyperparameter combination. Rather than save a plot for every model in CV (6 models 
+per hyperparam combo), I just saved the model loss plots for the final CV fold.  
+
+**Figure 6.** Training and validation loss plots for two models with different hyperparameter combinations. THe first is a model trained for the full 300 epochs, 
+but did not reach convergence. The second model had more aggressive gradient 
+clipping and met early stopping criteria after ~75 epochs of training.  
+<img src="./grid_search_figs/loss_combo0.png" width=300>
+<img src="./grid_search_figs/loss_combo4.png" width=300>
 
 ### Model selection
+
 describe selection process
-show figs of model performances (scatters)
+show plots for all the models
+
+Below are training and loss plots from all 10 models selected for the ensemble approach.  
+
+<img src="./grid_search_figs/loss_combo2.png" width=100>
+<img src="./grid_search_figs/loss_combo8.png" width=100>
+<img src="./grid_search_figs/loss_combo_momentumfix0.png" width=100>
+<img src="./grid_search_figs/loss_combo_momentumfix20.png" width=100>
+<img src="./grid_search_figs/loss_combo_momentumfix1.png" width=100>
+<img src="./grid_search_figs/loss_combo_momentumfix5.png" width=100>
+<img src="./grid_search_figs/loss_combo26.png" width=100>
+<img src="./grid_search_figs/loss_combo32.png" width=100>
+<img src="./grid_search_figs/loss_combo_momentumfix6.png" width=100>
+<img src="./grid_search_figs/loss_combo_momentumfix11.png" width=100>
 
 ### Ensemble approaches
 describe ensemble approaches

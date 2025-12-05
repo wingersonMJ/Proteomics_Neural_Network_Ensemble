@@ -80,12 +80,12 @@ hyperparam_combos = {
 # I ran the search previously and came up with these combos
 # Re-running now just so I can clean up the figures...
 hyperparam_combos = {
-    "batch_size": [6, 20],
-    "lr": [0.001, 0.0001],
-    "momentum": [0.1, 0.3],
+    "batch_size": [6],
+    "lr": [0.001],
+    "momentum": [0.6],
     "optimizer": ['sgd'],
-    "max_norm": [0.5, 1, 5],
-    "dropout_p": [0.1, 0.3]
+    "max_norm": [0.5],
+    "dropout_p": [0.3]
 }
 # build hyperparam combos
 keys = list(hyperparam_combos.keys())
@@ -249,12 +249,14 @@ for c, combo in enumerate(hyperparam_grid):
 
         # plot every once in a while 
         plt.figure(figsize=(8,6))
-        plt.plot(fold_train_losses, label="train loss")
-        plt.plot(fold_val_losses, label="val loss")
+        plt.plot(fold_train_losses, label="Train loss")
+        plt.plot(fold_val_losses, label="Val loss")
         plt.title(f"{combo}", fontsize=10)
+        plt.xlabel("Epochs")
+        plt.ylabel("MSE Loss")
         plt.legend()
         plt.tight_layout()
-        plt.savefig(f"./grid_search_figs/loss_combo{c}.png")
+        plt.savefig(f"./grid_search_figs/loss_combo_momentumfix2{c}.png")
         plt.close()
 
     # mean and sd training loss across folds 
@@ -287,4 +289,4 @@ print(f"Min. to run: {(end - start) / 60}\n")
 
 # explore best hyperparams
 df = pd.DataFrame(search_results_list)
-df.to_csv("../Data/hyper_param_results_re-run.csv")
+df.to_csv("../Data/hyper_param_results_re-run_momentumfix2.csv")
