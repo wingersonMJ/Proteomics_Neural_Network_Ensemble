@@ -73,6 +73,9 @@ class ProteomicsModel(nn.Module):
 
 ########
 # training loop
+# commenting out so it doesnt train and run
+# every time I call ProteomicsModel
+"""
 criterion = nn.MSELoss()
 learning_rate = 0.001
 momentum = 0.9
@@ -163,3 +166,4 @@ plt.title("Predicted Values - Initial NN Model")
 plt.tight_layout()
 plt.savefig("./figs/initial_NN_kde.jpg", dpi=300)
 plt.show()
+"""

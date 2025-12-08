@@ -265,6 +265,44 @@ learning. Below are training and loss plots for all 10 models selected:
 <br>
 
 ### Ensemble approaches
+
+In preperation for the ensemble learning, I re-trained each of the 
+selected models on the entire dataset. Because early stopping was 
+already used during hyperparameter searching, I just repeated the 
+same number of training epochs as were previously used during the 
+grid search.  
+
+Model loss was as follows:  
+|           | MSE Loss (full dataset) |
+| --------- | --------------- |
+| Model 112 | 263.5    |
+| Model 149 | 257.1    |
+| Model 180 | 240.9    |
+| Model 181 | 266.7    |
+| Model 184 | 238.8    |
+| Model 296 | 248.4    |
+| Model 436 | 238.7    |
+| Model 472 | 244.7    |
+| Model 504 | 246.6    |
+| Model 620 | 246.2    | 
+
+During CV, the MSE loss for each of the 10 models was as follows:  
+|           | :Mean Train Loss (SD): | :Mean Validation Loss (SD): |
+| --------- | ---------------------- | --------------------------- |
+| Model 112 | 221.0 (32.0)           | 264.0 (134.0)               |
+| Model 149 | 275.0 (29.0)           | 270.0 (133.0)               |
+| Model 180 | 224.0 (25.0)           | 267.0 (134.0)               |
+| Model 181 | 267.0 (29.0)           | 269.0 (138.0)               |
+| Model 184 | 212.0 (29.0)           | 273.0 (133.0)               |
+| Model 296 | 226.0 (34.0)           | 265.0 (134.0)               |
+| Model 436 | 214.0 (28.0)           | 263.0 (134.0)               |
+| Model 472 | 222.0 (20.0)           | 269.0 (138.0)               |
+| Model 504 | 208.0 (21.0)           | 267.0 (136.0)               |
+| Model 620 | 217.0 (26.0)           | 265.0 (133.0)               |
+| **Baseline Regressor** | 45.9 (7.71) | 167.1 (86.79)             |
+
+
+
 describe ensemble approaches
 performance of all models individually
 performance of each ensembler 

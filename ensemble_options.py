@@ -1,7 +1,7 @@
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 import torch
 import torch.nn as nn
@@ -15,10 +15,16 @@ from data_processing_pt2 import final_x, final_y
 from Model_selection import best_params
 from ProteomicsModel_hyperparams import ProteomicsModel
 
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
+from sklearn.model_selection import KFold
+
+plt.style.use('seaborn-v0_8-poster')
+
 # static params
 criterion = nn.MSELoss()
 device = torch.accelerator.current_accelerator().type
-seed = 42
+seed = 1989
 np.random.seed(seed)
 torch.manual_seed(seed)
 torch.cuda.manual_seed_all(seed)
@@ -39,33 +45,25 @@ dataset = TensorDataset(X, y)
 model_loss = []
 models = []
 for i, row in best_params.iterrows():
-
-    # instantize model
-    model = ProteomicsModel(
-        dropout_p=row["dropout_p"]).to(device)
+    model = ProteomicsModel(dropout_p=row["dropout_p"]).to(device)
     model.train()  
 
     # set hyper_params
     optimizer = optim.SGD(
         model.parameters(),
         lr=row["lr"],
-        momentum=row["momentum"]
-    )
+        momentum=row["momentum"])
     epochs = int(row["epochs_ran"])
 
-    # build dataloader
     dataloader = DataLoader(
         dataset,
         batch_size=row["batch_size"],
-        shuffle=True
-    )
+        shuffle=True)
 
     # train model
     epoch_loss = []
-
     for e in range(epochs):
         batch_losses = []
-
         for inputs, targets in dataloader:
             optimizer.zero_grad()
             outputs = model(inputs)
@@ -73,21 +71,20 @@ for i, row in best_params.iterrows():
             loss.backward()
             clip_grad_norm_(
                 model.parameters(),
-                max_norm=row["max_norm"]
-            )
+                max_norm=row["max_norm"])
             optimizer.step()
-
-            # track batch loss
             batch_losses.append(loss.item())
         
         # track epoch loss
         epoch_loss.append(np.mean(batch_losses))
 
     # plot 
-    plt.figure()
+    plt.figure(figsize=(10,8))
     plt.plot(epoch_loss, label="MSE Loss")
     plt.title(f"Loss for model_{i}")
-    plt.legend()
+    plt.xlabel("Epochs")
+    plt.ylabel("MSE Loss")
+    plt.tight_layout()
     plt.savefig(
         f"./training_figs/final_model_loss_{i}.jpg", dpi=300)
     plt.close()
@@ -97,28 +94,36 @@ for i, row in best_params.iterrows():
     models.append(model)
 
 # print loss
-print(model_loss)
+print(best_params.iloc[:,0])
+print(f"Loss on Full Dataset: {np.round(model_loss, 1)}")
+for i, row in best_params.iterrows():
+    print(f"\nModel {i}:\n"
+        f"Training Loss model:" 
+         f"{np.round(best_params.loc[i, "Mean_fold_Tloss"])} "
+         f"({np.round(best_params.loc[i, "SD_fold_Tloss"])})\n"
+         f"Validation Loss:"
+         f"{np.round(best_params.loc[i, "Mean_fold_Vloss"])} "
+         f"({np.round(best_params.loc[i, "SD_fold_Vloss"])})"
+)
 
 model_idx = [436, 620, 112, 296, 180, 
              472, 504, 149, 181, 184]
 model_idx = np.sort(model_idx)
 model_idx = [str(num) for num in model_idx]
 
-# make a bar plot
-plt.figure()
-plt.bar(x=model_idx, height=model_loss)
-plt.show()
 
-# get baseline perf
-baseline = []
-baseline.append(np.mean(model_loss))
-baseline.append(np.max(model_loss))
-baseline.append(np.min(model_loss))
-print(
-    f"Baseline: {baseline[0]:.0f}\n"
-    f"Best: {baseline[2]:.0f} | "
-    f"Worst: {baseline[1]:.0f}\n"
-)
+
+######
+# make cv
+# evaluate on test folds only for for mean and wtd mean
+# replace lin regressor with ridge regression
+# use cv to train + test
+    # copy method from baseline regressor
+# get train/test plot
+
+# for all three
+    # plot scatter of actual vs predicted
+    # match scatter from baseline plot
 
 ######
 # define ensemble methods
@@ -215,24 +220,13 @@ def ensemble_regressor(models, X, y, epochs):
     plt.show()
 
     # re-train final regressor on whole dataset
+    # return final predictions
     regressor.eval()
     with torch.no_grad():
         final_preds = regressor(preds_norm)
     
     return final_preds, losses
 
-regressor_preds, loss_3 = ensemble_regressor(
-                                models, X, y, epochs=8000)
 
-print(loss_3[-1])
-
-print(
-    f"Baseline: {baseline[0]:.0f}\n"
-    f"Best: {baseline[2]:.0f} | "
-    f"Worst: {baseline[1]:.0f}\n\n"
-    f"Mean ensemble: {loss_1:.1f}\n"
-    f"Wt Mean ensemble: {loss_2:.1f}\n"
-    f"Regression ensemble: {loss_3[-1]:.0f}"
-)
 
 # plot scatter or predicted vals and actuals

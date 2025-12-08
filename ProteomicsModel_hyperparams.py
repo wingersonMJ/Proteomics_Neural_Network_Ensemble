@@ -61,9 +61,7 @@ kf = KFold(n_splits=6, shuffle=True, random_state=seed)
 device = torch.accelerator.current_accelerator().type
 
 # define hyperparams
-# below is the full hyperparam combo I ran. 
-# I am commenting this out in case I accidently run this
-# whole file again. It took ~28 hours to run. Not v efficient.
+# commenting out this whole section
 """
 hyperparam_combos = {
     "batch_size": [6, 20, 60],
@@ -73,20 +71,7 @@ hyperparam_combos = {
     "max_norm": [0.5, 1.0, 5.0],
     "dropout_p": [0.1, 0.3, 0.5, 0.7]
 }
-"""
-# here is a limitted set of hyperparams
-# I am re-doing the search on just these params
-# I already know these are the params I want bc 
-# I ran the search previously and came up with these combos
-# Re-running now just so I can clean up the figures...
-hyperparam_combos = {
-    "batch_size": [6],
-    "lr": [0.001],
-    "momentum": [0.6],
-    "optimizer": ['sgd'],
-    "max_norm": [0.5],
-    "dropout_p": [0.3]
-}
+
 # build hyperparam combos
 keys = list(hyperparam_combos.keys())
 hyperparam_grid = []
@@ -256,7 +241,7 @@ for c, combo in enumerate(hyperparam_grid):
         plt.ylabel("MSE Loss")
         plt.legend()
         plt.tight_layout()
-        plt.savefig(f"./grid_search_figs/loss_combo_momentumfix2{c}.png")
+        plt.savefig(f"./grid_search_figs/loss_combo{c}.png")
         plt.close()
 
     # mean and sd training loss across folds 
@@ -289,4 +274,5 @@ print(f"Min. to run: {(end - start) / 60}\n")
 
 # explore best hyperparams
 df = pd.DataFrame(search_results_list)
-df.to_csv("../Data/hyper_param_results_re-run_momentumfix2.csv")
+df.to_csv("../Data/hyper_param_results.csv")
+"""

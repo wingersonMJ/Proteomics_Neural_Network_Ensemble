@@ -20,7 +20,7 @@ plt.xlabel("Mean CV Training Loss")
 plt.ylabel("Mean CV Validation Loss")
 plt.tight_layout()
 plt.savefig("./figs/search_results_all.jpg")
-plt.show()
+plt.close()
 
 # scatter train and val loss
 # filter out high vals
@@ -34,7 +34,7 @@ plt.xlabel("Mean CV Training Loss")
 plt.ylabel("Mean CV Validation Loss")
 plt.tight_layout()
 plt.savefig("./figs/search_results_filtered.jpg")
-plt.show()
+plt.close()
 
 # scatter train and val loss
 # filter out high vals
@@ -49,7 +49,7 @@ plt.xlabel("Mean CV Training Loss")
 plt.ylabel("Mean CV Validation Loss")
 plt.tight_layout()
 plt.savefig("./figs/search_results_possible.jpg")
-plt.show()
+plt.close()
 
 # identify model combo index values
 df_id = df[df['Mean_fold_Vloss'] < 280]
@@ -68,7 +68,7 @@ plt.ylabel("Mean CV Validation Loss")
 plt.colorbar()
 plt.tight_layout()
 plt.savefig("./figs/search_results_indexed_models.jpg", dpi=300)
-plt.show()
+plt.close()
 
 # scatter without index values
 plt.figure(figsize=(10,8))
@@ -88,7 +88,7 @@ cbar.set_ticks([])
 cbar.set_label("Validation loss SD")
 plt.tight_layout()
 plt.savefig("./figs/search_results_mean_and_sd.jpg", dpi=300)
-plt.show()
+plt.close()
 
 
 # filter to best param combos
@@ -111,7 +111,7 @@ plt.title("Models with the best hyperparameters based on CV performance")
 plt.xlabel("Training Loss")
 plt.ylabel("Validation Loss")
 plt.savefig("./figs/search_results_best_models.jpg", dpi=300)
-plt.show()
+plt.close()
 
 #################
 # show model configs
