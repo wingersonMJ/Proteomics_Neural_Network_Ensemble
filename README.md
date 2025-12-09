@@ -287,37 +287,130 @@ Model loss was as follows:
 | Model 620 | 246.2    | 
 
 During CV, the MSE loss for each of the 10 models was as follows:  
-|           | :Mean Train Loss (SD): | :Mean Validation Loss (SD): |
-| --------- | ---------------------- | --------------------------- |
-| Model 112 | 221.0 (32.0)           | 264.0 (134.0)               |
-| Model 149 | 275.0 (29.0)           | 270.0 (133.0)               |
-| Model 180 | 224.0 (25.0)           | 267.0 (134.0)               |
-| Model 181 | 267.0 (29.0)           | 269.0 (138.0)               |
-| Model 184 | 212.0 (29.0)           | 273.0 (133.0)               |
-| Model 296 | 226.0 (34.0)           | 265.0 (134.0)               |
-| Model 436 | 214.0 (28.0)           | 263.0 (134.0)               |
-| Model 472 | 222.0 (20.0)           | 269.0 (138.0)               |
-| Model 504 | 208.0 (21.0)           | 267.0 (136.0)               |
-| Model 620 | 217.0 (26.0)           | 265.0 (133.0)               |
-| **Baseline Regressor** | 45.9 (7.71) | 167.1 (86.79)             |
+|           | Mean Train Loss (SD) | Mean Validation Loss (SD) |
+| --------- | :------------------: | :-----------------------: |
+| Model 112 | 221.0 (32.0)         | 264.0 (134.0)             |
+| Model 149 | 275.0 (29.0)         | 270.0 (133.0)             |
+| Model 180 | 224.0 (25.0)         | 267.0 (134.0)             |
+| Model 181 | 267.0 (29.0)         | 269.0 (138.0)             |
+| Model 184 | 212.0 (29.0)         | 273.0 (133.0)             |
+| Model 296 | 226.0 (34.0)         | 265.0 (134.0)             |
+| Model 436 | 214.0 (28.0)         | 263.0 (134.0)             |
+| Model 472 | 222.0 (20.0)         | 269.0 (138.0)             |
+| Model 504 | 208.0 (21.0)         | 267.0 (136.0)             |
+| Model 620 | 217.0 (26.0)         | 265.0 (133.0)             |
+| **Baseline Regressor** | 45.9 (7.71) | 167.1 (86.79)         |
+<br>
 
+**I evaluated three approaches to ensemble learning:**
+1. Mean of predictions
+    - The mean of the predicted values from the 10 original models
+2. Weighted mean of predictions
+    - The mean of the predicted values from the 10 original models, 
+    but weighted such that the contribution of the original models 
+    is higher for models with a lower (i.e., better) MSE loss 
+    during CV. 
+3. Stacked regressor
+    - Train a linear regression to use the 10 original model 
+    outputs as inputs and make a single prediction. 
 
+I used cross-validation consistent with the CV used during original 
+model building (i.e., K=6) and when creating the baseline 
+regressor. MSE Loss was the criteria.  
 
-describe ensemble approaches
-performance of all models individually
-performance of each ensembler 
-show scatter of final regressor on top of predictions
-add cv approach to regressor too!
+The mean of prediction ensemble approach just took the mean of 
+the 10 original model's outputs.  
+
+The weighted mean of predictions ensemble approach use a 
+weighted mean of the 10 original model's outputs. The 
+method of weighting was to take the inverse of 
+the original models validation performance during the 
+inial CV training/validation loops. Here is how it works:  
+
+```python
+# set the weights to equal each model's cv validation loss
+w = model["CV_validation_loss"]
+
+# need to inverse so lower loss returns higher weight
+w = (w.max() + 1) - w # add 1 so no model returns 0
+
+# scale differences between models that are performing abt the same
+w = w ** 5
+
+# normalize 
+w = w / w.sum()
+```  
+The stacked regressor was trained in cross-validation training 
+sets and evaluated in validation sets. The regression was trained 
+for 4000 epochs.  
+
+**The mean and standard deviation MSE Loss for each ensemble 
+approach is included in the table below. Training loss is 
+reported for the stacked regressor but not the other 
+ensembles, because they did not need to be 'trained'** 
+
+| Ensemble approach:           | Training Loss | Validation Loss |
+| ---------------------------- | :-----------: | :-------------: |
+| Mean of predictions          | N/A           | 233.6 (111.30)  |
+| Weighted mean of predictions | N/A           | 233.0 (111.42)  |
+| Stacked regressor            | 131.2 (13.14) | 174.5 (74.25)   |
+| **Baseline Regressor**       | 45.9 (7.71)   | 167.1 (86.79)   |
+<br>
+
+**Figure 11.** A scatter of predicted vs actual target values for 
+ensemble predictors. The diagonal grey line represents a perfect 
+predictor.  
+
+<img src="./figs/mean_ensem_preds.jpg" width=300>
+<img src="./figs/mean_ensem_preds_kde.jpg" width=300>  
+<br>
+<img src="./figs/wtmean_ensem_preds.jpg" width=300>
+<img src="./figs/wtmean_ensem_preds_kde.jpg" width=300>  
+<br>
+
+**Stacked regressor ensemble:**  
+<img src="./figs/stacked_reg_preds.jpg" width=300>
+<img src="./figs/stacked_reg_preds_kde.jpg" width=300>
+
+**Revisiting the baseline ridge regression model:**  
+<img src="./figs/baseline_regressor.jpg" width=300>
+<img src="./figs//baseline_regressor_kde.jpg" width=300>
 
 ## Final summary and next steps
-Baseline regressor on limitted predictors was best performing model
-NN did not have enough training data to be effective 
-Future tasks:
-- Explore other modeling options
-    - beyond NN
-    - Find model to fit data, instead of fitting data to model
-- Better data engineering 
-    - reduce features
-    - combine features
-    - explore feature covariance/correlation
-- explore a true hold-out set
+
+1. The baseline regression with ridge normalization was a 
+quality predictor in this dataset. 
+    - It had a tendency to overfit to the dataset, however...
+    - Though validation loss and SD are lowest, it is unclear 
+    how the simple regression model would perform in a true 
+    hold-out set. 
+
+2. The neural networks individually were poor performers. 
+    - I likely did not have enough training data to make 
+    good use of the NN's ability to identify complex relationships.
+
+3. Ensemble learning with a stacked regressor was a good 
+solution to combining the predictions from several networks. 
+    - The mean and weighted mean ensembles did not significantly 
+    improve prediction performance. 
+        - This makes sense. If the individual models are not 
+        performing very well, it is unlikely that a simple 
+        mean or weighted mean of those predictions will improve 
+        our accuracy. 
+    - A stacked regressor reduced training and validation loss 
+    compared to the original models' performance. 
+
+4. Future tasks
+    - Increase sample size 
+        - Allow more complex model types (i.e., NN) to identify 
+        relationships in a larger group of subjects. 
+    - Include true hold-out sample
+        - So we can get a better idea of how different model types 
+        will generalize. 
+    - Improve feature engineering
+        - 7500+ features in this dataset. Need to find ways to:
+            - reduce the number of features 
+            - combine features if possible
+            - explore correlation/covariance among features
+    - Log transform the outcome
+        - Reduce influence of outlier datapoints
