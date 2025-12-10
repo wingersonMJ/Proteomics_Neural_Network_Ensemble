@@ -19,7 +19,7 @@ train a stacked linear regression on the network outputs.
     - [Initial model building](#initial-model-building)  
     - [Hyperparameter search](#hyperparameter-search)
     - [Model selection](#model-selection)
-    - [Ensemble approaches](#ensemble-approaches)\
+    - [Ensemble approaches](#ensemble-approaches)
 4. [Final summary and next steps](#final-summary-and-next-steps)
 
 ## Python files 
@@ -76,7 +76,7 @@ ethnicity were regressed out of the predictors ahead of time
 
 **Figure 1.** Correlation matrix represented as a heat map for 
 the predictor variables.  
-<img src="./figs/corr_map.jpg" width=500>
+<img src="./figs/corr_map.jpg" width=400>
 <br>
 
 The target variable is ```max_curve``` - the maximum Cobb angle of 
@@ -85,7 +85,7 @@ continuous/regression problem.
 
 **Figure 2.** Kernel density plots showing the distribution 
 of the target variable: max curve angle.  
-<img src="./figs/target_distribution.jpg" width=500>
+<img src="./figs/target_distribution.jpg" width=400>
 <br>
 
 ## Modeling approach
@@ -132,7 +132,7 @@ approach the training loss.
 **Figure 3.** Training and validation loss during 6-fold 
 cross-validation for a Ridge Regression predicting our 
 target variable.  
-<img src="./figs/ridge_alphas.jpg" width=300>
+<img src="./figs/ridge_alphas.jpg" width=400>
 <br>
 
 **Baseline Performance:** In 6-fold cross-validation, the baseline 
@@ -150,8 +150,8 @@ Results are reported as mean (SD) of MSE across all 6 folds of CV:
 regression model. These are the predicted values for each of the 6 
 validation sets in the 6-fold cross-validation. The grey dashed line 
 represents a perfect predictor.  
-<img src="./figs/baseline_regressor.jpg" width=200>
-<img src="./figs//baseline_regressor_kde.jpg" width=200>
+<img src="./figs/baseline_regressor.jpg" width=300>
+<img src="./figs//baseline_regressor_kde.jpg" width=300>
 <br>
 
 ### Initial model building
@@ -236,11 +236,11 @@ each hyperparameter combination. Rather than save a plot for every
 model in CV (6 models per hyperparam combination), I just saved the 
 model loss plots for the last CV fold.  
 
-**Figure 6.** Training and validation loss plots for two models 
-with different hyperparameter combinations. The first is a model 
-trained for the full 300 epochs, but did not reach convergence. 
-The second model had more aggressive gradient clipping and met 
-early stopping criteria after ~75 epochs of training.  
+**Figure 6.** Training and validation loss plots for two examples 
+of models in my grid search with different hyperparameter combinations. 
+The first is a model trained for the full 300 epochs that did not 
+reach convergence. The second had more aggressive gradient clipping 
+and met early stopping criteria after ~75 epochs of training.  
 <img src="./grid_search_figs/loss_combo0.png" width=300>
 <img src="./grid_search_figs/loss_combo4.png" width=300>
 
@@ -259,7 +259,7 @@ model across the 6-folds in cross-validation. Most models have
 training and validation losses below 1,000. A few models failed 
 to identify patterns in the data and thus have high loss. In the 
 next plot, I filter out those poor performing models.  
-<img src="./figs/search_results_all.jpg" width=300>
+<img src="./figs/search_results_all.jpg" width=400>
 <br>
 
 **Figure 8.** The same mean training and validation losses for 
@@ -379,6 +379,7 @@ I used cross-validation consistent with the CV used during original
 model building (i.e., K=6) and during evaluation of the baseline 
 regressor. MSE Loss was the criteria.  
 
+**Mean and weighted mean of predictions:**  
 The mean of prediction ensemble approach took the mean of the 10 original 
 model outputs. The weighted mean of predictions used a weighted mean of 
 the 10 model outputs. The weights assigned to each model's output were 
@@ -433,6 +434,7 @@ w = w / w.sum()
 y_pred = (inputs * w).sum()
 ```  
 
+**Stacked Regressor:**  
 The stacked regressor was trained in cross-validation training 
 sets and evaluated in validation sets. The regression was trained 
 for 4000 epochs, based on some exploration of the number of epochs
