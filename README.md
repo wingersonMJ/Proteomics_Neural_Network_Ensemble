@@ -479,9 +479,12 @@ predictor.
 
 <img src="./figs/mean_ensem_preds.jpg" width=300>
 <img src="./figs/mean_ensem_preds_kde.jpg" width=300>
+
 <br>
+
 <img src="./figs/wtmean_ensem_preds.jpg" width=300>
 <img src="./figs/wtmean_ensem_preds_kde.jpg" width=300>
+
 <br>
 
 **Stacked regressor ensemble:**  
