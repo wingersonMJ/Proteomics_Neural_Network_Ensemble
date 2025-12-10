@@ -477,15 +477,13 @@ investigation with a true hold-out set is required.
 ensemble predictors. The diagonal grey line represents a perfect 
 predictor.  
 
+**Mean of predictions:**  
 <img src="./figs/mean_ensem_preds.jpg" width=300>
 <img src="./figs/mean_ensem_preds_kde.jpg" width=300>
 
-<br>
-
+**Weighted mean of predictions:**  
 <img src="./figs/wtmean_ensem_preds.jpg" width=300>
 <img src="./figs/wtmean_ensem_preds_kde.jpg" width=300>
-
-<br>
 
 **Stacked regressor ensemble:**  
 <img src="./figs/stacked_reg_preds.jpg" width=300>
