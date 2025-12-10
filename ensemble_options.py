@@ -278,7 +278,6 @@ for fold, (train_idx, val_idx) in enumerate(kf.split(X), start=1):
         epochs=regressor_epochs
     )
     # track losses
-    # track losses as before
     mean_ensem_losses.append(fold_mean_loss)
     wtmean_ensem_losses.append(fold_wtmean_losses)
     reg_ensem_tLosses.append(tLoss[-1])

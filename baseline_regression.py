@@ -22,11 +22,15 @@ def mse(y_pred, y):
     return loss
 
 def regression_cv(model, X, y):
+
     # set folds
     kf = KFold(n_splits=6, shuffle=True, random_state=42)
 
+    # track losses, predictions, and actuals for each fold
     train_loss = []
     val_loss = []
+    val_preds = []
+    val_actuals = []
 
     for fold, (train_idx, val_idx) in enumerate(kf.split(X), 
                                                  start=1):
@@ -44,8 +48,13 @@ def regression_cv(model, X, y):
         mse_train = mse(y_pred_train, y_train)
         mse_val = mse(y_pred_val, y_val)
 
+        # track loss
         train_loss.append(mse_train)
         val_loss.append(mse_val)
+
+        # track preds and actuals
+        val_preds.append(y_pred_val)
+        val_actuals.append(y_val)
 
     train_loss = np.array(train_loss)
     val_loss = np.array(val_loss)
@@ -56,7 +65,9 @@ def regression_cv(model, X, y):
     mean_vLoss = val_loss.mean()
     std_tLoss = train_loss.std()
     std_vLoss = val_loss.std()
-    return mean_tLoss, mean_vLoss, std_tLoss, std_vLoss
+    return (mean_tLoss, mean_vLoss, 
+            std_tLoss, std_vLoss,
+            val_preds, val_actuals)
 
 # model
 linearModel = LinearRegression()
@@ -72,18 +83,16 @@ vLoss_alphas = []
 for a in alphas:
     ridgeModel = Ridge(alpha=a)
     print(f"\nAlpha: {a}")
-    tLoss, vLoss, std_vLoss, std_tLoss = regression_cv(
+    tLoss, vLoss, std_vLoss, std_tLoss, p, a = regression_cv(
         ridgeModel, X_np, y_np)
     tLoss_alphas.append(tLoss)
     vLoss_alphas.append(vLoss)
 
 plt.figure(figsize=(8,7))
 plt.plot(alphas, tLoss_alphas, 
-         label="training loss"
-)
+         label="training loss")
 plt.plot(alphas, vLoss_alphas,
-         label="validation loss"
-)
+         label="validation loss")
 plt.legend()
 plt.xlabel("Alpha in Ridge Normalization")
 plt.ylabel("MSE Loss")
@@ -94,30 +103,34 @@ plt.show()
 # re-fit best regularized model
 ridgeModel = Ridge(alpha=500)
 final_model = ridgeModel.fit(X_np, y_np)
-y_pred = final_model.predict(X_np)
-t, v, t_std, v_std = regression_cv(ridgeModel, X_np, y_np)
+t, v, t_std, v_std, p, a = regression_cv(ridgeModel, X_np, y_np)
+
+# concat each fold preds and actuals
+all_val_preds = np.concatenate(p)
+all_val_actuals = np.concatenate(a)
 
 # plot predictions vs actuals
-sns.jointplot(x=y_pred, y=y_np)
+sns.jointplot(x=all_val_preds, y=all_val_actuals)
 plt.plot([30, 80], [30, 80], 
          linestyle="--", 
          color="dimgrey",
          label="Perfect prediction line")
 plt.xlabel("Predicted values")
 plt.ylabel("Actual values")
-plt.title("Predicted Values - Baseline Model")
+plt.title("Baseline Regression")
 plt.tight_layout()
 plt.savefig("./figs/baseline_regressor.jpg", dpi=300)
 plt.show()
 
-sns.jointplot(x=y_pred, y=y_np, kind='kde', fill=True)
+sns.jointplot(x=all_val_preds, y=all_val_actuals, 
+              kind='kde', fill=True)
 plt.plot([30, 80], [30, 80], 
          linestyle="--", 
          color="dimgrey",
          label="Perfect prediction line")
 plt.xlabel("Predicted values")
 plt.ylabel("Actual values")
-plt.title("Predicted Values - Baseline Model")
+plt.title("Baseline Regression")
 plt.tight_layout()
 plt.savefig("./figs/baseline_regressor_kde.jpg", dpi=300)
 plt.show()
